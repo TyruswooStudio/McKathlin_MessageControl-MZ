@@ -7,7 +7,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Tyruswoo Team
+ * Copyright (c) 2023 Kathy Bunn and Scott Tyrus Washburn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
