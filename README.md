@@ -202,6 +202,9 @@ If you don't your game's UI to show these back panels, set the parameter
 - Fixed crash at start of random battles when adaptive window
   placement is set to active event.
 
+**v2.1.1** - 8/30/2023
+- This plugin is now free and open source under the [MIT license](https://opensource.org/license/mit/).
+
 > Happy storytelling!
 > 
 > -McKathlin
