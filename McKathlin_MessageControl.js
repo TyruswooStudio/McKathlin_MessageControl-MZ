@@ -36,7 +36,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 
 /*:
  * @target MZ
- * @plugindesc v1.1.1 Word wrap and fine text adjustments.
+ * @plugindesc MZ v1.1.1 Word wrap and fine text adjustments.
  * @author McKathlin and Tyruswoo
  * @url https://www.tyruswoo.com
  *
