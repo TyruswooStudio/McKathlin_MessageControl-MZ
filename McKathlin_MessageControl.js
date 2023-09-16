@@ -36,7 +36,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 
 /*:
  * @target MZ
- * @plugindesc v2.1.1 Alter message window size, color, position, etc.
+ * @plugindesc MZ v2.1.1 Alter message window size, color, position, etc.
  * @author McKathlin and Tyruswoo
  * @url https://www.tyruswoo.com
  *
