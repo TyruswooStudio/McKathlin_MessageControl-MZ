@@ -36,7 +36,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 
 /*:
  * @target MZ
- * @plugindesc MZ v2.1.1 Alter message window size, color, position, etc.
+ * @plugindesc MZ v2.1.2 Alter message window size, color, position, etc.
  * @author McKathlin and Tyruswoo
  * @url https://www.tyruswoo.com
  *
@@ -294,6 +294,9 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * v2.1.1  8/30/2023
  *        - This plugin is now free and open source under the MIT license.
  * 
+ * v2.1.2  1/24/2024
+ *        - Fixed bug where some escape characters threw off text wrapping
+ *          calculations and caused lines to wrap too short.
  * ============================================================================
  * MIT License
  *
@@ -1378,7 +1381,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 			// Start with entire remainder of line, and shorten to fit.
 			var lineEndIndex = text.length;
 			var testLine = text.slice(lineStartIndex, lineEndIndex);
-			while (this.textWidth(testLine) > width) {
+			while (this.printedTextWidth(testLine) > width) {
 				lineEndIndex = lineStartIndex + testLine.lastIndexOf(' ');
 				if (lineEndIndex < lineStartIndex) {
 					break;
@@ -1392,7 +1395,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 				// Inch back the line length until the segment is short enough.
 				lineEndIndex = text.length;
 				testLine = text.slice(lineStartIndex, lineEndIndex);
-				while (this.textWidth(testLine) > width) {
+				while (this.printedTextWidth(testLine) > width) {
 					lineEndIndex--;
 					testLine = text.slice(lineStartIndex, lineEndIndex);
 				}
