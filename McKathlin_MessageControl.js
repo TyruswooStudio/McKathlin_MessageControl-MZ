@@ -294,7 +294,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * v2.1.1  8/30/2023
  *        - This plugin is now free and open source under the MIT license.
  * 
- * v2.1.2  1/24/2024
+ * v2.1.2  1/29/2024
  *        - Fixed bug where some escape characters threw off text wrapping
  *          calculations and caused lines to wrap too short.
  * ============================================================================
@@ -532,6 +532,12 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * @min -255
  * @max 255
  * @default 0
+ */
+
+// TODO: Bring the following bugfixes from our HOM build to our public build:
+/* - Fix various bugs affecting word wrap on scrolling text
+ * - Fix critical error affecting message windows when Word Wrap Width
+ *   Percent is blank, zero, or very small.
  */
 
 (() => {
@@ -970,8 +976,8 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	// Alias method
 	// This is the least obtrusive place to customize window properties
 	// before they're actually used.
-	McKathlin.MessageControl.Window_createAllParts = Window.prototype.initialize;
-	Window.prototype.createAllParts = function() {
+	McKathlin.MessageControl.Window_createAllParts = Window.prototype._createAllParts;
+	Window.prototype._createAllParts = function() {
 		this._margin = McKathlin.MessageControl.param.windowMargin;
 		McKathlin.MessageControl.Window_createAllParts.call(this);
 	};
