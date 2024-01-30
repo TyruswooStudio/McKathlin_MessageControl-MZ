@@ -297,6 +297,8 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * v2.1.2  1/29/2024
  *        - Fixed bug where some escape characters threw off text wrapping
  *          calculations and caused lines to wrap too short.
+ *        - Fixed bug where tails of letters in party member names were getting
+ *          cut off.
  * ============================================================================
  * MIT License
  *
@@ -532,12 +534,6 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * @min -255
  * @max 255
  * @default 0
- */
-
-// TODO: Bring the following bugfixes from our HOM build to our public build:
-/* - Fix various bugs affecting word wrap on scrolling text
- * - Fix critical error affecting message windows when Word Wrap Width
- *   Percent is blank, zero, or very small.
  */
 
 (() => {
@@ -968,6 +964,14 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 				McKathlin.MessageControl.param.lineHeightAdjust;
 		};
 	}
+
+	// Spare some little extra room to write names,
+	// for the sake of tails on 'g', 'p', 'q', and 'y'.
+	McKathlin.MessageControl.Sprite_Name_bitmapHeight =
+		Sprite_Name.prototype.bitmapHeight;
+	Sprite_Name.prototype.bitmapHeight = function() {
+		return 40 + McKathlin.MessageControl.param.lineHeightAdjust;
+	};
 
 	//-----------------------------------------------------------------------------
 	// Window Margin 
@@ -1435,13 +1439,6 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		}
 		return textState;
 	};
-
-	// Extended method
-	// Window_ScrollText does text wrap the same way as Window_Message.
-	// Both refer to the same system text wrap setting.
-	Window_ScrollText.prototype.createTextState =
-		Window_Message.prototype.createTextState;
-	
 	
 	// Overrides new method defined in this plugin,
 	// to account for matters specific to Window_Message.
@@ -1504,6 +1501,37 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		$gameMessage.endSameLineText();
 		return retVal;
 	};
+
+	//----------------------------------------------------------------------------
+	// Scrolling text word wrap
+	//----------------------------------------------------------------------------
+
+	// Alias method
+	// If text wrap is on, same-line mode is activated,
+	// so that in-editor line breaks will be ignored.
+	// TODO: Include this change in the next MAJOR version release,
+	// as it may break some existing scrolling text.
+	/*
+	McKathlin.MessageControl.Game_Interpreter_command105_body =
+		Game_Interpreter.prototype.command105;
+	Game_Interpreter.prototype.command105 = function(params) {
+		if ($gameMessage.isBusy()) {
+			return false;
+		}
+		if ($gameSystem.isMessageTextWrapEnabled()) {
+			$gameMessage.startSameLineText();
+		}
+		var retVal = McKathlin.MessageControl.Game_Interpreter_command105_body.call(this, params);
+		$gameMessage.endSameLineText();
+		return retVal;
+	};
+	*/
+
+	// Alias method
+	// Window_ScrollText does text wrap the same way as Window_Message.
+	// Both refer to the same system text wrap setting.
+	Window_ScrollText.prototype.createTextState =
+		Window_Message.prototype.createTextState;
 
 	//----------------------------------------------------------------------------
 	// Description word wrap

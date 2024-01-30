@@ -208,6 +208,7 @@ If you don't your game's UI to show these back panels, set the parameter
 **v2.1.2** - 1/29/2024
 - Fixed bug where some escape characters threw off text wrapping
   calculations and caused some lines to wrap too short.
+- Fixed bug where tails of letters in party member names were getting cut off.
 
 > Happy storytelling!
 > 
