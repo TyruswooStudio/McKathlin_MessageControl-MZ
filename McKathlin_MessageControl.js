@@ -417,7 +417,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * Copyright (c) 2023 Kathy Bunn and Scott Tyrus Washburn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the “Software”), to
+ * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
@@ -426,7 +426,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -722,6 +722,55 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	//============================================================================
 	// Parameters and Constants
 	//============================================================================
+	// Fallback Presets
+	// Style presets that have their own plugin commands are hard-coded here
+	// in case they're missing from the presets list plugin parameter.
+	//----------------------------------------------------------------------------
+
+	McKathlin.MessageControl.FallbackPresets = {
+		'Center': {
+			textAlign: 'Center',
+			position: 'Center',
+			wordWrap: false,
+			adaptivePositionTarget: 'None'
+		},
+		'Center Large': {
+			lineCount: 12,
+			textAlign: 'Center',
+			position: 'Center',
+			wordWrap: false,
+			adaptivePositionTarget: 'None'
+		},
+		'Poem': {
+			wordWrap: false
+		},
+		'Black': {
+			color: [-255, -255, -255]
+		},
+		'Wood': {
+			color: [68, 51, 34],
+			textAlign: 'Center',
+			instantText: true
+		},
+		'Book': {
+			lineCount: 16,
+			color: [68, 51, 34],
+			width: 720,
+			instantText: true
+		},
+		'Stone': {
+			color: [34, 34, 51],
+			textAlign: 'Center',
+			instantText: true
+		},
+		'Sandstone': {
+			color: [100, 35, 0],
+			textAlign: 'Center',
+			instantText: true
+		}
+	};
+
+	//----------------------------------------------------------------------------
 	// Parameter Parsing
 	//----------------------------------------------------------------------------
 
@@ -729,6 +778,8 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	// The lookup is indexed by both name and numberic index.
 	McKathlin.MessageControl.makePresetsLookup = function(defaultPreset, arrayJson) {
 		var lookup = {};
+
+		// Add the user-defined presets.
 		lookup[defaultPreset.name] = defaultPreset;
 		var presetArray = JSON.parse(arrayJson);
 		for (let i = 0; i < presetArray.length; i++) {
@@ -736,6 +787,15 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 			lookup[i] = preset;
 			lookup[preset.name] = preset;
 		}
+
+		// Add fallback presets only where missing.
+		for (const name in McKathlin.MessageControl.FallbackPresets) {
+			if (!lookup[name]) {
+				console.warn(name + " preset is missing. Using fallback settings.");
+				lookup[name] = McKathlin.MessageControl.FallbackPresets[name];
+			}
+		}
+
 		return lookup;
 	};
 
@@ -776,15 +836,15 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		McKathlin.MessageControl.makePresetsLookup(
 			McKathlin.MessageControl.param.startingDefaultWindowPreset,
 			McKathlin.MessageControl.parameters['Window Style Presets']);
-	McKathlin.MessageControl.param.autoRevert =
-		McKathlin.MessageControl.parameters['Auto-Revert to Default Style'] == 'true';
+	McKathlin.MessageControl.param.autoRevert = ('true' ==
+		McKathlin.MessageControl.parameters['Auto-Revert to Default Style']);
 	McKathlin.MessageControl.param.defaultBattleMessagePreset =
 		McKathlin.MessageControl.param.presetsByName[
 			McKathlin.MessageControl.parameters['Default Battle Message Style']];
 
 	// Word Wrap Help Window
-	McKathlin.MessageControl.param.wordWrapHelpWindow =
-		McKathlin.MessageControl.parameters['Word Wrap Help Window'] == 'true';
+	McKathlin.MessageControl.param.wordWrapHelpWindow = ('true' ==
+		McKathlin.MessageControl.parameters['Word Wrap Help Window']);
 
 	// Left and right message padding
 	McKathlin.MessageControl.param.messagePaddingLeft =
@@ -815,12 +875,27 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		McKathlin.MessageControl.parameters['Dim Window Style'];
 
 	// Back panels for selectable items
-	McKathlin.MessageControl.param.showWindowContentsBackPanels =
-		(McKathlin.MessageControl.parameters['Show Window Contents Back Panels'] == 'true');
+	McKathlin.MessageControl.param.showWindowContentsBackPanels = ('true' ==
+		McKathlin.MessageControl.parameters['Show Window Contents Back Panels']);
 
 	//============================================================================
 	// Plugin Commands
 	//============================================================================
+
+	// TODO: Tie message preset selection to the interpreter.
+
+	// The code below gives Tyruswoo and McKathlin plugins a way to access
+	// the calling interpreter: it's added to args as args.interpreter.
+	if (!Tyruswoo.rmmz_PluginManager_callCommand) {
+		Tyruswoo.rmmz_PluginManager_callCommand = PluginManager.callCommand;
+		PluginManager.callCommand = function(caller, pluginName, commandName, args) {
+			if (/^Tyruswoo|^McKathlin/.test(pluginName)) {
+				args.interpreter = caller;
+			}
+			Tyruswoo.rmmz_PluginManager_callCommand.call(
+				this, caller, pluginName, commandName, args);
+		};
+	}
 
 	PluginManager.registerCommand(pluginName, "default", args => {
 		$gameSystem.resetMessageControlToDefault();
@@ -1015,11 +1090,10 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		this.setMessageLineCount(preset.lineCount);
 		this.setMessageWindowTone(preset.color);
 		this.setMessageTextAlign(preset.textAlign);
-		this.enableMessageTextWrap(preset.wordWrap);
+		this.setMessageTextWrap(preset.wordWrap);
 		this.setMessageAdaptivePositionTarget(preset.adaptivePositionTarget);
-		this.enableMessageInstantText(preset.instantText);
-		this.enablePageBreakBetweenTextCommands(
-			preset.pageBreakBetweenTextCommands);
+		this.setMessageInstantText(preset.instantText);
+		this.setPageBreakBetweenTextCommands(preset.pageBreakBetweenTextCommands);
 	};
 
 	//New method
@@ -1057,8 +1131,11 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	//-- default preset --
 
 	Game_System.prototype.defaultMessagePreset = function() {
-		return this._messageControl.defaultPreset ||
-			McKathlin.MessageControl.param.startingDefaultWindowPreset;
+		if (!this._messageControl.defaultPreset) {
+			this._messageControl.defaultPreset =
+				McKathlin.MessageControl.param.startingDefaultWindowPreset;
+		}
+		return this._messageControl.defaultPreset;
 	};
 
 	Game_System.prototype.setDefaultMessagePreset = function(preset) {
@@ -1077,7 +1154,10 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	};
 
 	Game_System.prototype.setMessagePosition = function(keyword) {
-		this._messageControl.position = keyword.toLowerCase();
+		if (!keyword) {
+			keyword = this.defaultMessagePreset().position;
+		}
+		this._messageControl.position = keyword || 'left';
 		this._messageControl.isDefault = false;
 	};
 
@@ -1087,7 +1167,10 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		return this._messageControl.width || Graphics.boxWidth;
 	};
 
-	Game_System.prototype.setMessageWidth = function(width=null) {
+	Game_System.prototype.setMessageWidth = function(width) {
+		if (!width) {
+			width = this.defaultMessagePreset().width || 0;
+		}
 		this._messageControl.width = width;
 		this._messageControl.isDefault = false;
 	};
@@ -1099,6 +1182,9 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	};
 
 	Game_System.prototype.setMessageLineCount = function(count) {
+		if (!count) {
+			count = this.defaultMessagePreset().lineCount || 4;
+		}
 		this._messageControl.lineCount = count;
 		this._messageControl.isDefault = false;
 	};
@@ -1110,7 +1196,11 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	};
 
 	Game_System.prototype.setMessageWindowTone = function(tone) {
+		if (!tone) {
+			tone = this.defaultMessagePreset().color || this._windowTone;
+		}
 		this._messageControl.windowTone = tone;
+			
 		this._messageControl.isDefault = false;
 	};
 
@@ -1121,11 +1211,11 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	};
 
 	Game_System.prototype.setMessageTextAlign = function(alignString) {
-		if (alignString) {
-			this._messageControl.textAlign = alignString.toLowerCase();
-		} else {
-			this._messageControl.textAlign = "Left";
+		if (!alignString) {
+			alignString = this.defaultMessagePreset().textAlign;
 		}
+		this._messageControl.textAlign = alignString ?
+			alignString.toLowerCase() : 'left';
 		this._messageControl.isDefault = false;
 	};
 
@@ -1136,6 +1226,10 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	};
 
 	Game_System.prototype.setMessageAdaptivePositionTarget = function(value) {
+		if (!value) {
+			value = this.defaultMessagePreset().adaptivePositionTarget;
+		}
+
 		if ('string' === typeof value) {
 			value = value.toLowerCase();
 		} else if (!value) {
@@ -1169,14 +1263,22 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	};
 
 	// New method
-	Game_System.prototype.enableMessageTextWrap = function(value = true) {
+	Game_System.prototype.setMessageTextWrap = function(value) {
+		if (undefined === value) {
+			value = this.defaultMessagePreset().wordWrap;
+		}
 		this._messageControl.textWrapEnabled = value;
 		this._messageControl.isDefault = false;
 	};
 
 	// New method
+	Game_System.prototype.enableMessageTextWrap = function() {
+		this.setMessageTextWrap(true);
+	};
+
+	// New method
 	Game_System.prototype.disableMessageTextWrap = function() {
-		this.enableMessageTextWrap(false);
+		this.setMessageTextWrap(false);
 	};
 
 	//-- instant text --
@@ -1187,14 +1289,22 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	};
 
 	// New method
-	Game_System.prototype.enableMessageInstantText = function(value = true) {
-		this._messageControl.instantTextEnabled = value;
+	Game_System.prototype.setMessageInstantText = function(value) {
+		if (undefined === value) {
+			value = this.defaultMessagePreset().instantText;
+		}
+		this._messageControl.instantTextEnabled = value || false;
 		this._messageControl.isDefault = false;
 	};
 
 	// New method
+	Game_System.prototype.enableMessageInstantText = function() {
+		this.setMessageInstantText(true);
+	};
+
+	// New method
 	Game_System.prototype.disableMessageInstantText = function() {
-		this.enableMessageInstantText(false);
+		this.setMessageInstantText(false);
 	};
 
 	//-- page break between text commands --
@@ -1204,13 +1314,23 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		return !!this._messageControl.pageBreakBetweenTextCommands;
 	};
 
-	Game_System.prototype.enablePageBreakBetweenTextCommands = function(value = true) {
+	Game_System.prototype.setPageBreakBetweenTextCommands = function(value) {
+		if (undefined === value) {
+			value = this.defaultMessagePreset().pageBreakBetweenTextCommands;
+			if (undefined === value) {
+				value = true;
+			}
+		}
 		this._messageControl.pageBreakBetweenTextCommands = value;
 		this._messageControl.isDefault = false;
 	};
 
+	Game_System.prototype.enablePageBreakBetweenTextCommands = function() {
+		this.setPageBreakBetweenTextCommands(true);
+	};
+
 	Game_System.prototype.disablePageBreakBetweenTextCommands = function() {
-		this.enablePageBreakBetweenTextCommands(false);
+		this.setPageBreakBetweenTextCommands(false);
 	};
 
 	//=============================================================================
