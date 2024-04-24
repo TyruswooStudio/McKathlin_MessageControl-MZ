@@ -36,7 +36,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 
 /*:
  * @target MZ
- * @plugindesc MZ v2.1.2 Alter message window size, color, position, etc.
+ * @plugindesc MZ v3.0.0 Alter message window size, color, position, etc.
  * @author McKathlin and Tyruswoo
  * @url https://www.tyruswoo.com
  *
@@ -78,30 +78,93 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * ============================================================================
  * Plugin Commands
  * ============================================================================
- * Position Center     - Start centering the message window horizontally.
- * 
- * Position Left       - Start positioning the message window on the left
- *                       side of the screen.
- * 
- * Position Right      - Start positioning the message window on the right
- *                       side of the screen.
+ * Reset to Default    - Reset the window style to default settings.
+ *
+ * Use Preset: Center  - Use the window style defined by the "Center" preset.
+ *                       If this preset has not been defined, then use the
+ *                       built-in "Center" preset:
+ *                        > Text Align: Center
+ *                        > Word Wrap: False
+ *                       For all other settings, the built-in "Center" preset
+ *                       uses the default preset.
+ *
+ * Use Preset: Center Large
+ *                     - Use the window style defined by the "Center Large"
+ *                       preset. If this preset has not been defined, then use
+ *                       the built-in "Center Large" preset:
+ *                        > Line Count: 12
+ *                        > Text Align: Center
+ *                        > Word Wrap: False
+ *                       For all other settings, the built-in "Center Large"
+ *                       preset uses the default preset.
+ *
+ * Use Preset: Poem    - Use the window style defined by the "Poem" preset.
+ *                       If this preset has not been defined, then use the
+ *                       built-in "Poem" preset:
+ *                        > Word Wrap: False
+ *                       For all other settings, the built-in "Poem" preset
+ *                       uses the default preset.
+ *
+ * Use Preset: Black   - Use the window style defined by the "Black" preset.
+ *                       If this preset has not been defined, then use the
+ *                       built-in "Black" preset:
+ *                        > Color: {"red":"-255","green":"-255","blue":"-255"}
+ *                       For all other settings, the built-in "Black" preset
+ *                       uses the default preset.
+ *
+ * Use Preset: Wood    - Use the window style defined by the "Wood" preset.
+ *                       If this preset has not been defined, then use the
+ *                       built-in "Wood" preset:
+ *                        > Color: {"red":"68","green":"51","blue":"34"}
+ *                        > Text Align: Center
+ *                        > Instant Text: True
+ *                       For all other settings, the built-in "Wood" preset
+ *                       uses the default preset.
+ *
+ * Use Preset: Book    - Use the window style defined by the "Book" preset.
+ *                       If this preset has not been defined, then use the
+ *                       built-in "Book" preset:
+ *                        > Color: {"red":"68","green":"51","blue":"34"}
+ *                        > Line Count: 16
+ *                        > Width: 720
+ *                        > Instant Text: True
+ *                       For all other settings, the built-in "Book" preset
+ *                       uses the default preset.
+ *
+ * Use Preset: Stone   - Use the window style defined by the "Stone" preset.
+ *                       If this preset has not been defined, then use the
+ *                       built-in "Stone" preset:
+ *                        > Color: {"red":"34","green":"34","blue":"51"}
+ *                        > Text Align: Center
+ *                        > Instant Text: True
+ *                       For all other settings, the built-in "Stone" preset
+ *                       uses the default preset.
+ *
+ * Use Preset: Sandstone
+ *                     - Use the window style defined by the "Sandstone"
+ *                       preset. If this preset has not been defined, then
+ *                       use the built-in "Sandstone" preset:
+ *                        > Color: {"red":"100","green":"35","blue":"0"}
+ *                        > Text Align: Center
+ *                        > Instant Text: True
+ *                       For all other settings, the built-in "Sandstone"
+ *                       preset uses the default preset.
  * 
  * Use Preset          - Start using the window style defined in the
  *                       preset named in the Preset Name argument.
+ *                       Use this to call a preset you defined yourself.
  *                       For info on setting up presets, see this help text's
  *                       Plugin Paramters section for Window Style Presets.
- * 
- * Reset to Default    - Reset the window style to default settings.
  * 
  * Save Preset as New Default
  *                     - The preset named in this command's Preset Name
  *                       will be the new default window style, preserved in
- *                       the current game's save data.
+ *                       the current save file's save data.
  * 
  * Save Current Settings as New Default
  *                     - The current message window style settings (color, size,
  *                       word wrap, etc.) will be the new default window style,
- *                       preserved in the current game's save data.
+ *                       preserved in the current save file's save data.
  * 
  * Turn Word Wrap OFF  - Disables word wrap in this event's message window.
  *                       When word wrap is off, editor newlines are honored.
@@ -110,8 +173,20 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  *                       When word wrap is turned on, line breaks from the editor
  *                       are ignored. To force a line break in a specific place,
  *                       use the text code <br>
+ *
+ * Window Position Center
+ *                     - Start positioning the window in the horizontal center
+ *                       of the screen.
  * 
- * Adaptive Position: Player
+ * Window Position Left
+ *                     - Start positioning the message window on the left
+ *                       side of the screen.
+ * 
+ * Window Position Right
+ *                     - Start positioning the message window on the right
+ *                       side of the screen.
+ * 
+ * Window Position: Adapt to Player
  *                     - Start making the message window adapt to the position
  *                       of the player. If a bottom-positioned message window
  *                       would overlap the player, it's top-positioned instead.
@@ -122,13 +197,13 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  *                       An Adaptive Position call lasts until the end of the
  *                       active event's processing.
  * 
- * Adaptive Position: Event
+ * Window Position: Adapt to Event
  *                     - Start making the message window avoid overlapping the
  *                       event that contains this plugin command call. As with
  *                       Adaptive Position: Player, bottom may shift to top,
  *                       or top to bottom, but middle stays where it is.
  * 
- * Adaptive Position: Off
+ * Window Position: Adapt Off
  *                     - Disable the Adaptive Position feature until the active
  *                       event's processing ends. Message Windows will show up
  *                       exactly where their text commands dictate, regardless
@@ -172,6 +247,8 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  *   Word Wrap    - Whether to use text wrapping.
  *                  When word wrap is on, editor line breaks are ignored.
  *                  Use <br> to insert a line break into message text.
+ *                  When Word Wrap is on for message windows, it will also
+ *                  affect scrolling text.
  * 
  *   Adaptive Position Target
  *                - Active Event, Player, or None.
@@ -198,18 +275,6 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * is permanent for the current save, until another Use Preset command or the
  * Reset to Default command runs.
  * 
- * Word Wrap Width Percent
- * ------------------------
- * Word wrap relies on JavaScript's text width measurement feature, which
- * behaves differently depending on the font you use. If you've turned on
- * word wrap but text overflows the right side of the message window,
- * decrease the plugin parameter Word Wrap Width Percent slightly
- * until it looks better. A fraction of a point may be enough.
- * If your text stops too far short of the right edge of the window,
- * increase Word Wrap Width Percent slightly.
- * Leaving Word Wrap Width Percent blank, or entering a value smaller than
- * 10, will cause the game to use the default value, which is 99.5%.
- * 
  * Word Wrap Help Window
  * ----------------------
  * Use this plugin parameter to turn word wrap ON or OFF for text shown
@@ -218,31 +283,67 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * Turn Word Wrap ON or Turn Word Wrap OFF, or customize the window style
  * preset to have word wrap on or off.
  * 
- * Text Y Adjust
- * ---------------
- * Text Y Adjust alters where text sits on its line. If you notice the font
- * you've chosen sits too high on its line, a positive Text Y Adjust can
- * improve its appearance. Or if the text sits too low, a negative Text Y
- * Adjust can correct it.
+ * Message Padding Left
+ * ---------------------
+ * Use this to give message text additional padding on the left side,
+ * beyond the Window Padding that's applied to all windows (see below).
+ * Message Padding Left only applies to message windows and help windows.
  * 
- * Line Height Adjust
+ * Message Padding Right
+ * ----------------------
+ * Use this to give message text additional padding on the right side,
+ * beyond the Window Padding that's applied to all windows (see below).
+ * Message Padding Right only applies to message windows and help windows,
+ * and then only if they have word wrap turned ON.
+ * If word wrap tends to run off the right edge of the window, add a few
+ * pixels to Message Padding Right until the problem is resolved.
+ * 
+ * Text X and Y Adjust
+ * --------------------
+ * Text X Adjust and Text Y Adjust alter where text sits on its line.
+ * If you notice the font you've chosen sits too high on its line, a positive
+ * Text Y Adjust can improve its appearance. Or if the text sits too low, a
+ * negative Text Y Adjust can correct it.
+ * Positive Text X Adjust scoots text that many pixels to the right; while a
+ * negative Text X Adjust scoots text to the left.
+ * 
+ * Line Height
  * -------------------
- * Line Height Adjust increases or decreases line height by a given number of
- * pixels. If the text in the font and size you've chosen looks cramped, a
- * positive Line Height adjust can give it vertical space. Lines per window
- * will remain the same, so increasing Line Height Adjust makes the message
- * window and other text-holding windows taller. A negative Line Height Adjust
- * makes windows more compact; each contained line takes less vertical space.
+ * RPG Maker MZ's default height for non-selectable lines is 36 pixels.
+ * If the text in the font and size you've chosen looks cramped, increase the
+ * Line Height parameter to give it vertical space. Lines per window
+ * will remain the same, so increasing Line Height makes the message window
+ * and other text-holding windows taller. Decrease the Line Height parameter
+ * to make windows more compact; each contained line will take less vertical
+ * space.
+ * 
+ * Selectable Item Height
+ * -----------------------
+ * RPG Maker MZ's default height for selectable items is 44 pixels.
+ * This plugin allows you to change this number to change how much vertical
+ * space each selectable item in a menu gets.
+ * 
+ * We recommend using an even number for the Selectable Item Height, as
+ * using an odd height may cause cursor rendering glitches in some windows.
  * 
  * Window Margin
  * --------------
- * The parameter Window Margin alters the distance from the edge of UI
+ * The parameter Window Margin alters the distance from the edge of all UI
  * windows, to the edge of the map or background on all sides.
  * RMMZ's default is 4; a 4-pixel-wide sliver of background shows beyond
  * window edges.
  * Increase Window Margin to show a wider band of background.
  * Decrease Window Margin to 0 to put the window's edge flush with the edge
  * of the game's display, a look typical of retro games.
+ * 
+ * Window Padding
+ * ---------------
+ * The Window Padding is the distance, in pixels, from a window's edges to its
+ * interior where text and other contents are displayed. This setting applies
+ * to all of your game's UI windows.
+ * RMMZ's default window padding is 12 pixels.
+ * Increase Window Padding to make a wider berth between window edge and text.
+ * Decrease the padding to bring a window's contained text closer to its edge.
  * 
  * Dim Window Style
  * -----------------
@@ -291,14 +392,25 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  *        - Fixed crash at start of random battles when adaptive window
  *          placement is set to active event.
  * 
- * v2.1.1  8/30/2023
- *        - This plugin is now free and open source under the MIT license.
- * 
- * v2.1.2  1/29/2024
+ * v2.1.2  1/24/2024
  *        - Fixed bug where some escape characters threw off text wrapping
  *          calculations and caused lines to wrap too short.
- *        - Fixed bug where tails of letters in party member names were getting
- *          cut off.
+ *        - Fixed various bugs affecting word wrap on scrolling text
+ *        - Fixed critical error affecting message windows when Word Wrap Width
+ *          Percent was blank, zero, or very small.
+ *
+ * v3.0.0  __/__/2023
+ *        - Added plugin params Message Padding Left, Message Padding Right,
+ *          Window Margin, and Window Padding.
+ *        - Removed "Word Wrap Width Percent" parameter, as padding parameters
+ *          make it obsolete.
+ *        - Added convenience "Use Preset" plugin commands. You can use our
+ *          built-in presets, or override the built-in presets to make them
+ *          your own! Also, you can continue to use your own presets using the
+ *          standard "Use Preset" plugin command.
+ *        - Art Assets: Various window border and background colors and styles.
+ *        - Renamed and rearranged plugin commands.
+ * 
  * ============================================================================
  * MIT License
  *
@@ -343,39 +455,74 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * @desc At the end of processing an event, automatically
  * change the window style back to the game default.
  * 
- * @param Word Wrap Width Percent
- * @type decimal
- * @default 99.5
- * @desc Use this percent of the window's inner width as the
- * maximum text width per line, for word wrapping.
+ * @param Default Battle Message Style
+ * @type text
+ * @default Short
+ * @desc The name of the style preset to use on the
+ * message window in battle (unless overridden).
  * 
  * @param Word Wrap Help Window
  * @type boolean
  * @default true
  * @desc Whether to use text wrapping on descriptions in help windows.
  * 
+ * @param Message Padding Left
+ * @type number
+ * @min -60
+ * @max 60
+ * @default 0
+ * @desc Put this many more pixels (beyond Window Padding)
+ * to the left of text in Message Window and Help Window.
+ * 
+ * @param Message Padding Right
+ * @type number
+ * @min -60
+ * @max 60
+ * @default 0
+ * @desc Leave this many more pixels (beyond Window Padding)
+ * to the right of text in Message Window and Help Window.
+ * 
+ * @param Text X Adjust
+ * @type number
+ * @min -30
+ * @max 30
+ * @default 0
+ * @desc Number of pixels to shift all window text to the right.
+ * Negative shifts left.
+ * 
  * @param Text Y Adjust
  * @type number
  * @min -30
- * @max 60
+ * @max 30
  * @default 0
  * @desc Number of pixels to shift all window text downward.
  * Negative shifts up.
  * 
- * @param Line Height Adjust
+ * @param Line Height
  * @type number
- * @min -30
- * @max 60
- * @default 0
- * @desc Number of pixels of additional vertical space between lines.
- * Negative number constricts vertical space per line.
- * @parent Text Y Adjust
+ * @min 4
+ * @max 90
+ * @default 36
+ * @desc Number of pixels from one non-selectable line to the next.
+ * 
+ * @param Selectable Item Height
+ * @type number
+ * @min 12
+ * @max 102
+ * @default 44
+ * @desc Number of pixels from one Selectable Window line to the next.
  * 
  * @param Window Margin
  * @type number
  * @default 4
  * @desc Number of pixels from edge of window to edge of screen graphics.
  * 4 is RMMZ default; 0 is flush with screen edge.
+ * 
+ * @param Window Padding
+ * @type number
+ * @default 12
+ * @desc Distance in pixels from all UI windows' edges to
+ * area containing text. Default is 12.
  * 
  * @param Dim Window Style
  * @type select
@@ -389,18 +536,43 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * @type boolean
  * @desc Show gradient-decorated panels behind selectable items in windows
  * @default true
- * 
- * @command center
- * @text Position Center
- * @desc Center the message window's horizontal position on the screen.
- * 
- * @command left
- * @text Position Left
- * @desc Show the message window on the left side of the screen.
- * 
- * @command right
- * @text Position Right
- * @desc Show the message window on the right side of the screen.
+ *
+ * @command default
+ * @text Reset to Default
+ * @desc Change message window color, width, line count, etc.
+ * back to your game's defaults.
+ *
+ * @command preset_center
+ * @text Use Preset: Center
+ * @desc Use the color, width, line count, etc. of the "Center" preset. (To override, define in your window styles.)
+ *
+ * @command preset_center_large
+ * @text Use Preset: Center Large
+ * @desc Use the color, width, line count, etc. of the "Center Large" preset. (To override, define in your window styles.)
+ *
+ * @command preset_poem
+ * @text Use Preset: Poem
+ * @desc Use the color, width, line count, etc. of the "Poem" preset. (To override, define in your window styles.)
+ *
+ * @command preset_black
+ * @text Use Preset: Black
+ * @desc Use the color, width, line count, etc. of the "Black" preset. (To override, define in your window styles.)
+ *
+ * @command preset_wood
+ * @text Use Preset: Wood
+ * @desc Use the color, width, line count, etc. of the "Wood" preset. (To override, define in your window styles.)
+ *
+ * @command preset_book
+ * @text Use Preset: Book
+ * @desc Use the color, width, line count, etc. of the "Book" preset. (To override, define in your window styles.)
+ *
+ * @command preset_stone
+ * @text Use Preset: Stone
+ * @desc Use the color, width, line count, etc. of the "Stone" preset. (To override, define in your window styles.)
+ *
+ * @command preset_sandstone
+ * @text Use Preset: Sandstone
+ * @desc Use the color, width, line count, etc. of the "Book" preset. (To override, define in your window styles.)
  * 
  * @command preset
  * @text Use Preset
@@ -409,11 +581,6 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * @text Preset Name
  * @type string
  * @desc The name of the preset to start using.
- * 
- * @command default
- * @text Reset to Default
- * @desc Change message window color, width, line count, etc.
- * back to your game's defaults.
  * 
  * @command save_preset_as_new_default
  * @text Save Preset as New Default
@@ -432,21 +599,34 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * @command word_wrap_off
  * @text Turn Word Wrap OFF
  * @desc Stop using text wrapping on the message window.
+ * (Default RPG Maker behavior.)
  * 
  * @command word_wrap_on
  * @text Turn Word Wrap ON
  * @desc Start using text wrapping on the message window.
  * 
+ * @command center
+ * @text Window Position Center
+ * @desc Center the message window's horizontal position on the screen.
+ * 
+ * @command left
+ * @text Window Position Left
+ * @desc Show the message window on the left side of the screen.
+ * 
+ * @command right
+ * @text Window Position Right
+ * @desc Show the message window on the right side of the screen.
+ * 
  * @command adaptive_position_player
- * @text Adaptive Position: Player
+ * @text Window Position: Adapt to Player
  * @desc Start making message window avoid overlapping player.
  * 
  * @command adaptive_position_event
- * @text Adaptive Position: Event
+ * @text Window Position: Adapt to Event
  * @desc Start making message window avoid overlapping active event.
  * 
  * @command adaptive_position_off
- * @text Adaptive Position: Off
+ * @text Window Position: Adapt Off
  * @desc Turn off Adaptive Window Position feature.
  */
 
@@ -598,36 +778,37 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 			McKathlin.MessageControl.parameters['Window Style Presets']);
 	McKathlin.MessageControl.param.autoRevert =
 		McKathlin.MessageControl.parameters['Auto-Revert to Default Style'] == 'true';
-
-	// Word Wrap Width Fraction
-	McKathlin.MessageControl.defaultWordWrapWidthFraction = 0.995;
-	if (McKathlin.MessageControl.parameters['Word Wrap Width Percent']) {
-		McKathlin.MessageControl.param.wordWrapWidthFraction = 0.01 * Number(
-			McKathlin.MessageControl.parameters['Word Wrap Width Percent']);
-		if (McKathlin.MessageControl.param.wordWrapWidthFraction < 0.1) {
-			// It's too small. Use the default value.
-			McKathlin.MessageControl.param.wordWrapWidthFraction =
-				McKathlin.MessageControl.defaultWordWrapWidthFraction;
-		}
-	} else {
-		// It's blank or zero. Use the default value.
-		McKathlin.MessageControl.param.wordWrapWidthFraction =
-			McKathlin.MessageControl.defaultWordWrapWidthFraction;
-	}
+	McKathlin.MessageControl.param.defaultBattleMessagePreset =
+		McKathlin.MessageControl.param.presetsByName[
+			McKathlin.MessageControl.parameters['Default Battle Message Style']];
 
 	// Word Wrap Help Window
 	McKathlin.MessageControl.param.wordWrapHelpWindow =
 		McKathlin.MessageControl.parameters['Word Wrap Help Window'] == 'true';
 
+	// Left and right message padding
+	McKathlin.MessageControl.param.messagePaddingLeft =
+		Number(McKathlin.MessageControl.parameters['Message Padding Left']);
+	McKathlin.MessageControl.param.messagePaddingRight =
+		Number(McKathlin.MessageControl.parameters['Message Padding Right']);
+
 	// Text position adjustments
+	McKathlin.MessageControl.param.textXAdjust =
+		Number(McKathlin.MessageControl.parameters['Text X Adjust']);
 	McKathlin.MessageControl.param.textYAdjust =
 		Number(McKathlin.MessageControl.parameters['Text Y Adjust']);
-	McKathlin.MessageControl.param.lineHeightAdjust = 
-		Number(McKathlin.MessageControl.parameters['Line Height Adjust']);
+	McKathlin.MessageControl.param.lineHeight = 
+		Number(McKathlin.MessageControl.parameters['Line Height']);
+	McKathlin.MessageControl.param.selectableItemHeight = 
+		Number(McKathlin.MessageControl.parameters['Selectable Item Height']);
 
 	// Margin for all windows
 	McKathlin.MessageControl.param.windowMargin =
 		Number(McKathlin.MessageControl.parameters['Window Margin']);
+
+	// Padding between all windows' edges and text
+	McKathlin.MessageControl.param.windowPadding =
+		Number(McKathlin.MessageControl.parameters['Window Padding']);
 
 	// Dim window style
 	McKathlin.MessageControl.param.dimWindowStyle =
@@ -641,16 +822,104 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	// Plugin Commands
 	//============================================================================
 
-	PluginManager.registerCommand(pluginName, "center", args => {
-		$gameSystem.setMessagePosition('center');
+	PluginManager.registerCommand(pluginName, "default", args => {
+		$gameSystem.resetMessageControlToDefault();
+	});
+	
+	PluginManager.registerCommand(pluginName, "preset_center", args => {
+		const convenience_preset_name = "Center";
+		const preset = McKathlin.MessageControl.param.presetsByName[convenience_preset_name];
+		if (!preset) {
+			const warningFormat = "No such preset: " + convenience_preset_name + "\nIgnoring preset command.";
+			console.warn(warningFormat.format(convenience_preset_name));
+			return;
+		}
+		$gameSystem.applyMessagePreset(preset);
+		$gameMessage.requestSizeRefresh();
+	});
+	
+	PluginManager.registerCommand(pluginName, "preset_center_large", args => {
+		const convenience_preset_name = "Center Large";
+		const preset = McKathlin.MessageControl.param.presetsByName[convenience_preset_name];
+		if (!preset) {
+			const warningFormat = "No such preset: " + convenience_preset_name + "\nIgnoring preset command.";
+			console.warn(warningFormat.format(convenience_preset_name));
+			return;
+		}
+		$gameSystem.applyMessagePreset(preset);
+		$gameMessage.requestSizeRefresh();
+	});
+	
+	PluginManager.registerCommand(pluginName, "preset_poem", args => {
+		const convenience_preset_name = "Poem";
+		const preset = McKathlin.MessageControl.param.presetsByName[convenience_preset_name];
+		if (!preset) {
+			const warningFormat = "No such preset: " + convenience_preset_name + "\nIgnoring preset command.";
+			console.warn(warningFormat.format(convenience_preset_name));
+			return;
+		}
+		$gameSystem.applyMessagePreset(preset);
+		$gameMessage.requestSizeRefresh();
+	});
+	
+	PluginManager.registerCommand(pluginName, "preset_black", args => {
+		const convenience_preset_name = "Black";
+		const preset = McKathlin.MessageControl.param.presetsByName[convenience_preset_name];
+		if (!preset) {
+			const warningFormat = "No such preset: " + convenience_preset_name + "\nIgnoring preset command.";
+			console.warn(warningFormat.format(convenience_preset_name));
+			return;
+		}
+		$gameSystem.applyMessagePreset(preset);
+		$gameMessage.requestSizeRefresh();
+	});
+	
+	PluginManager.registerCommand(pluginName, "preset_wood", args => {
+		const convenience_preset_name = "Wood";
+		const preset = McKathlin.MessageControl.param.presetsByName[convenience_preset_name];
+		if (!preset) {
+			const warningFormat = "No such preset: " + convenience_preset_name + "\nIgnoring preset command.";
+			console.warn(warningFormat.format(convenience_preset_name));
+			return;
+		}
+		$gameSystem.applyMessagePreset(preset);
+		$gameMessage.requestSizeRefresh();
+	});
+	
+	PluginManager.registerCommand(pluginName, "preset_book", args => {
+		const convenience_preset_name = "Book";
+		const preset = McKathlin.MessageControl.param.presetsByName[convenience_preset_name];
+		if (!preset) {
+			const warningFormat = "No such preset: " + convenience_preset_name + "\nIgnoring preset command.";
+			console.warn(warningFormat.format(convenience_preset_name));
+			return;
+		}
+		$gameSystem.applyMessagePreset(preset);
+		$gameMessage.requestSizeRefresh();
+	});
+	
+	PluginManager.registerCommand(pluginName, "preset_stone", args => {
+		const convenience_preset_name = "Stone";
+		const preset = McKathlin.MessageControl.param.presetsByName[convenience_preset_name];
+		if (!preset) {
+			const warningFormat = "No such preset: " + convenience_preset_name + "\nIgnoring preset command.";
+			console.warn(warningFormat.format(convenience_preset_name));
+			return;
+		}
+		$gameSystem.applyMessagePreset(preset);
+		$gameMessage.requestSizeRefresh();
 	});
 
-	PluginManager.registerCommand(pluginName, "left", args => {
-		$gameSystem.setMessagePosition('left');
-	});
-
-	PluginManager.registerCommand(pluginName, "right", args => {
-		$gameSystem.setMessagePosition('right');
+	PluginManager.registerCommand(pluginName, "preset_sandstone", args => {
+		const convenience_preset_name = "Sandstone";
+		const preset = McKathlin.MessageControl.param.presetsByName[convenience_preset_name];
+		if (!preset) {
+			const warningFormat = "No such preset: " + convenience_preset_name + "\nIgnoring preset command.";
+			console.warn(warningFormat.format(convenience_preset_name));
+			return;
+		}
+		$gameSystem.applyMessagePreset(preset);
+		$gameMessage.requestSizeRefresh();
 	});
 
 	PluginManager.registerCommand(pluginName, "preset", args => {
@@ -662,10 +931,6 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		}
 		$gameSystem.applyMessagePreset(preset);
 		$gameMessage.requestSizeRefresh();
-	});
-
-	PluginManager.registerCommand(pluginName, "default", args => {
-		$gameSystem.resetMessageControlToDefault();
 	});
 
 	PluginManager.registerCommand(pluginName, "save_preset_as_new_default", args => {
@@ -690,6 +955,18 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		$gameSystem.enableMessageTextWrap();
 	});
 
+	PluginManager.registerCommand(pluginName, "center", args => {
+		$gameSystem.setMessagePosition('center');
+	});
+
+	PluginManager.registerCommand(pluginName, "left", args => {
+		$gameSystem.setMessagePosition('left');
+	});
+
+	PluginManager.registerCommand(pluginName, "right", args => {
+		$gameSystem.setMessagePosition('right');
+	});
+
 	PluginManager.registerCommand(pluginName, "adaptive_position_event", args => {
 		$gameSystem.setMessageAdaptivePositionTarget("event");
 	});
@@ -712,7 +989,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 
 	//-- init on new game or load game --
 
-	// Extended method
+	// Alias method
 	McKathlin.MessageControl.Game_System_initialize =
 		Game_System.prototype.initialize;
 	Game_System.prototype.initialize = function() {
@@ -766,7 +1043,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		return !!this._messageControl;
 	};
 
-	// Extended method
+	// Alias method
 	McKathlin.MessageControl.DataManager_correctDataErrors =
 		DataManager.correctDataErrors;
 	DataManager.correctDataErrors = function() {
@@ -942,39 +1219,36 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	// Text Position Fine Tuning
 	//-----------------------------------------------------------------------------
 	
-	// Text Y Adjust
-
-	if (McKathlin.MessageControl.param.textYAdjust) {
-		// Extended method
+	// Text X and Y Adjust
+	if (McKathlin.MessageControl.param.textXAdjust ||
+		McKathlin.MessageControl.param.textYAdjust) {
+		// Alias method
 		McKathlin.MessageControl.Bitmap_drawText = Bitmap.prototype.drawText;
 		Bitmap.prototype.drawText = function(text, x, y, maxWidth, lineHeight, align) {
-			McKathlin.MessageControl.Bitmap_drawText.call(this, text, x,
-				y + McKathlin.MessageControl.param.textYAdjust, maxWidth, lineHeight, align);
+			const adjustedX = x + McKathlin.MessageControl.param.textXAdjust;
+			const adjustedY = y + McKathlin.MessageControl.param.textYAdjust;
+			McKathlin.MessageControl.Bitmap_drawText.call(this,
+				text, adjustedX, adjustedY, maxWidth, lineHeight, align);
 		};
 	}
-
-	// Line Height Adjust
-
-	if (McKathlin.MessageControl.param.lineHeightAdjust) {
-		// Extended method
-		McKathlin.MessageControl.Window_Base_lineHeight =
-			Window_Base.prototype.lineHeight;
-		Window_Base.prototype.lineHeight = function() {
-			return McKathlin.MessageControl.Window_Base_lineHeight.call(this) +
-				McKathlin.MessageControl.param.lineHeightAdjust;
-		};
-	}
-
-	// Spare some little extra room to write names,
-	// for the sake of tails on 'g', 'p', 'q', and 'y'.
-	McKathlin.MessageControl.Sprite_Name_bitmapHeight =
-		Sprite_Name.prototype.bitmapHeight;
-	Sprite_Name.prototype.bitmapHeight = function() {
-		return 40 + McKathlin.MessageControl.param.lineHeightAdjust;
-	};
 
 	//-----------------------------------------------------------------------------
-	// Window Margin 
+	// Vertical Space Fine Tuning
+	//-----------------------------------------------------------------------------
+
+	// Replacement method
+	Window_Base.prototype.lineHeight = function() {
+		return McKathlin.MessageControl.param.lineHeight;
+	};
+
+	// Replacement method
+	// Use RMMZ default line height as starting point.
+	Window_Selectable.prototype.itemHeight = function() {
+		return McKathlin.MessageControl.param.selectableItemHeight;
+	};
+	
+	//-----------------------------------------------------------------------------
+	// Window Margin
 	//-----------------------------------------------------------------------------
 
 	// Alias method
@@ -994,6 +1268,14 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		const boxMargin = McKathlin.MessageControl.param.windowMargin;
 		Graphics.boxWidth = uiAreaWidth - boxMargin * 2;
 		Graphics.boxHeight = uiAreaHeight - boxMargin * 2;
+	};
+
+	//-----------------------------------------------------------------------------
+	// Window Padding
+	//-----------------------------------------------------------------------------
+	
+	Game_System.prototype.windowPadding = function() {
+		return McKathlin.MessageControl.param.windowPadding;
 	};
 
 	//-----------------------------------------------------------------------------
@@ -1037,7 +1319,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	// Game_Message size refresh signaling
 	//----------------------------------------------------------------------------
 
-	// Extended method
+	// Alias method
 	McKathlin.MessageControl.Game_Message_clear = Game_Message.prototype.clear;
 	Game_Message.prototype.clear = function() {
 		McKathlin.MessageControl.Game_Message_clear.call(this);
@@ -1131,7 +1413,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		}
 	};
 
-	// Extended method
+	// Alias method
 	// Instant text option also makes page's text show fast.
 	McKathlin.MessageControl.Window_Message_updateShowFast =
 		Window_Message.prototype.updateShowFast;
@@ -1142,7 +1424,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		}
 	};
 
-	// Extended method
+	// Alias method
 	McKathlin.MessageControl.Window_Message_startMessage =
 		Window_Message.prototype.startMessage;
 	Window_Message.prototype.startMessage = function() {
@@ -1174,7 +1456,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		this.createContents();
 	};
 
-	// Extended method
+	// Alias method
 	McKathlin.MessageControl.Window_Message_processNewPage =
 		Window_Message.prototype.processNewPage;
 	Window_Message.prototype.processNewPage = function(textState) {
@@ -1183,7 +1465,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		textState.x = this.findLineStartX(textState);
 	};
 
-	// Extended method
+	// Alias method
 	McKathlin.MessageControl.Window_Message_processNewLine =
 		Window_Message.prototype.processNewLine;
 	Window_Message.prototype.processNewLine = function(textState) {
@@ -1194,8 +1476,10 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 
 	// New method
 	Window_Message.prototype.findLineStartX = function(textState) {
+		const leftX = textState.startX +
+			McKathlin.MessageControl.param.messagePaddingLeft;
 		if ('left' == $gameSystem.messageTextAlign()) {
-			return textState.startX;
+			return leftX;
 		}
 		const nextNewlineIdx = textState.text.indexOf('\n', textState.index);
 		var line;
@@ -1207,10 +1491,10 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		}
 		const spareWidth = this.widthForWrappingText() - this.printedTextWidth(line);
 		if ('right' == $gameSystem.messageTextAlign()) {
-			return textState.startX + spareWidth;
+			return leftX + spareWidth;
 		} else {
 			// It's center aligned.
-			return textState.startX + (spareWidth / 2);
+			return leftX + (spareWidth / 2);
 		}
 	};
 
@@ -1232,6 +1516,33 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	//----------------------------------------------------------------------------
 	// Window_NameBox adjustments
 	//----------------------------------------------------------------------------
+
+	// Alias method
+	// Give extra width to accommodate message padding
+	McKathlin.MessageControl.Window_NameBox_windowWidth =
+		Window_NameBox.prototype.windowWidth;
+	Window_NameBox.prototype.windowWidth = function() {
+		var width = McKathlin.MessageControl.Window_NameBox_windowWidth.call(this);
+		if (width > 0) {
+			width += McKathlin.MessageControl.param.messagePaddingLeft;
+			width += McKathlin.MessageControl.param.messagePaddingRight;
+			width = Math.min(width, Graphics.boxWidth);
+		}
+		return width;
+	};
+
+	// New override method
+	// This applies message padding to the name box window,
+	// so that its text lines up with that of the message window below it.
+	Window_NameBox.prototype.baseTextRect = function() {
+		const leftPadding = McKathlin.MessageControl.param.messagePaddingLeft;
+		const rightPadding = McKathlin.MessageControl.param.messagePaddingRight;
+		const x = leftPadding;
+		const width = this.innerWidth - (leftPadding + rightPadding);
+		const rect = new Rectangle(x, 0, width, this.innerHeight);
+		rect.pad(-this.itemPadding(), 0);
+		return rect;
+	};
 
 	// Override of Window_Base.prototype.updateTone
 	Window_NameBox.prototype.updateTone = function() {
@@ -1257,7 +1568,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		}
 	};
 
-	// Extended method
+	// Alias method
 	// Handles an edge case where a message window taller than half the screen
 	// is placed on the bottom.
 	McKathlin.MessageControl.Window_ChoiceList_windowY =
@@ -1339,19 +1650,44 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	};
 
 	//----------------------------------------------------------------------------
+	// Battle window style
+	//----------------------------------------------------------------------------
+
+	// Alias method
+	McKathlin.MessageControl.BattleManager_startBattle =
+		BattleManager.startBattle;
+	BattleManager.startBattle = function() {
+		$gameSystem.applyMessagePreset(
+			McKathlin.MessageControl.param.defaultBattleMessagePreset);
+		McKathlin.MessageControl.BattleManager_startBattle.call(this);
+	};
+
+	McKathlin.MessageControl.BattleManager_endBattle =
+		BattleManager.endBattle;
+	BattleManager.endBattle = function(result) {
+		$gameSystem.resetMessageControlToDefault();
+		McKathlin.MessageControl.BattleManager_endBattle.call(this, result);
+	};
+
+	//----------------------------------------------------------------------------
 	// Window style auto-revert
 	//----------------------------------------------------------------------------
 
 	if (McKathlin.MessageControl.param.autoRevert) {
-		// Extended method
+		// Alias method
 		// End of event processing returns window style to default.
 		McKathlin.MessageControl.Game_Interpreter_terminate =
 			Game_Interpreter.prototype.terminate;
 		Game_Interpreter.prototype.terminate = function() {
 			McKathlin.MessageControl.Game_Interpreter_terminate.call(this);
-			$gameSystem.resetMessageControlToDefault();
-		}
-	}
+			if ($gameParty.inBattle()) {
+				$gameSystem.applyMessagePreset(
+					McKathlin.MessageControl.param.defaultBattleMessagePreset);
+			} else {
+				$gameSystem.resetMessageControlToDefault();
+			}
+		};
+	} // endif auto-revert is on
 
 	//============================================================================
 	// Word Wrap
@@ -1378,8 +1714,10 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 
 	// New method
 	Window_Base.prototype.widthForWrappingText = function() {
-		return this.contents.width *
-			McKathlin.MessageControl.param.wordWrapWidthFraction;
+		const baseWidth = this.innerWidth;
+		const padding = McKathlin.MessageControl.param.messagePaddingLeft +
+			McKathlin.MessageControl.param.messagePaddingRight;
+		return baseWidth - padding;
 	};
 
 	// New method
@@ -1421,7 +1759,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	// Message word wrap
 	//----------------------------------------------------------------------------
 
-	// Extended method
+	// Alias method
 	Window_Message.prototype.createTextState = function(text, x, y, width) {
 		var textState = Window_Base.prototype.createTextState.call(
 			this, text, x, y, width);
@@ -1443,13 +1781,14 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	// Overrides new method defined in this plugin,
 	// to account for matters specific to Window_Message.
 	Window_Message.prototype.widthForWrappingText = function() {
-		var width = this.contents.width;
+		var width = this.innerWidth;
+		width -= McKathlin.MessageControl.param.messagePaddingLeft;
+		width -= McKathlin.MessageControl.param.messagePaddingRight;
 		if ($gameMessage.faceName() !== "") {
 			// account for face
 			const FACE_SPACING = 16;
 			width -= (ImageManager.faceWidth + FACE_SPACING);
 		}
-		width *= McKathlin.MessageControl.param.wordWrapWidthFraction;
 		return width;
 	};
 
@@ -1469,7 +1808,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		this._sameLineText = undefined;
 	};
 
-	// Extended method
+	// Alias method
 	// Enables same-line text mode.
 	McKathlin.MessageControl.Game_Message_add =
 		Game_Message.prototype.add;
@@ -1485,7 +1824,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		}
 	};
 
-	// Extended method
+	// Alias method
 	// Forces multi-line message commands onto same line,
 	// while otherwise leaving command101 as previously defined.
 	McKathlin.MessageControl.Game_Interpreter_command101_body =
@@ -1509,9 +1848,6 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 	// Alias method
 	// If text wrap is on, same-line mode is activated,
 	// so that in-editor line breaks will be ignored.
-	// TODO: Include this change in the next MAJOR version release,
-	// as it may break some existing scrolling text.
-	/*
 	McKathlin.MessageControl.Game_Interpreter_command105_body =
 		Game_Interpreter.prototype.command105;
 	Game_Interpreter.prototype.command105 = function(params) {
@@ -1525,20 +1861,30 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 		$gameMessage.endSameLineText();
 		return retVal;
 	};
-	*/
 
-	// Alias method
-	// Window_ScrollText does text wrap the same way as Window_Message.
-	// Both refer to the same system text wrap setting.
+	// Word wrap works the same with scrolling text as with normal message
 	Window_ScrollText.prototype.createTextState =
 		Window_Message.prototype.createTextState;
 
 	//----------------------------------------------------------------------------
-	// Description word wrap
+	// Description word wrap and text padding
 	//----------------------------------------------------------------------------
+
+	// New override method
+	// This applies message padding to the help window.
+	Window_Help.prototype.baseTextRect = function() {
+		const leftPadding = McKathlin.MessageControl.param.messagePaddingLeft;
+		const rightPadding = McKathlin.MessageControl.param.messagePaddingRight;
+		const x = leftPadding;
+		const width = this.innerWidth - (leftPadding + rightPadding);
+		const rect = new Rectangle(x, 0, width, this.innerHeight);
+		rect.pad(-this.itemPadding(), 0);
+		return rect;
+	};
 
 	if (McKathlin.MessageControl.param.wordWrapHelpWindow) {
 		Window_Help.prototype.createTextState = function(text, x, y, width) {
+			// TODO: apply left margin?
 			var textState = Window_Base.prototype.createTextState.call(
 				this, text, x, y, width);
 			var newText = textState.text.replaceAll('\n', ' '); // ignore newlines
@@ -1559,4 +1905,5 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
 			return textState;
 		}
 	} // end else of if word wrap description
+
 })();
