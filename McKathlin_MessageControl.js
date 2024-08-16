@@ -365,7 +365,7 @@ McKathlin.MessageControl = McKathlin.MessageControl || {};
  * "Show Window Contents Back Panels" to OFF (false).
  * 
  * ============================================================================
- * For more help using the Message Control plugin, see Tyruswoo.com.
+ * Visit Tyruswoo.com to ask for help, donate, or browse more of our plugins.
  * ============================================================================
  * Version History:
  *
