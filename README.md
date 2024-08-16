@@ -175,7 +175,7 @@ on choice lists and on every selectable list or menu in the game.
 If you don't your game's UI to show these back panels, set the parameter
 "Show Window Contents Back Panels" to OFF (false).
 
-### For more help using the Message Control plugin, see [Tyruswoo.com](https://www.tyruswoo.com).
+### Visit [**Tyruswoo.com**](https://www.tyruswoo.com) to [ask for help](https://www.tyruswoo.com/contact-us/), [donate](https://www.tyruswoo.com/donate/), or browse more of our [plugins](https://www.tyruswoo.com/downloads/rpg-maker-plugin-downloads/).
 
 ## Version History:
 
